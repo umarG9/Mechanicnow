@@ -1,100 +1,205 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>MechanicNow Nigeria</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <style>
-    body { margin:0; font-family: sans-serif; }
-    #map { height: 65vh; width: 100%; }
-    .header { background: #00b050; color: white; padding: 12px; display: flex; justify-content: space-between; align-items: center; }
-    .list { padding: 10px; height: 28vh; overflow-y: auto; }
-    .card { border: 1px solid #ddd; border-radius: 10px; padding: 10px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
-    .btn { background: #00b050; color: white; border: none; padding: 10px 18px; border-radius: 8px; cursor: pointer; font-weight: bold; }
-    select { padding: 6px; border-radius: 6px; }
-  </style>
+<meta charset="UTF-8">
+<title>MechanicNow Nigeria - All in One</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#00b050">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif;background:#f8f9fa;-webkit-tap-highlight-color:transparent}
+#map,#mapMech{height:40vh;width:100%;z-index:1;border-radius:12px}
+.header{background:#00b050;color:white;padding:14px 16px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:1000}
+.card{border:1px solid #e9ecef;border-radius:14px;padding:14px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;background:white;box-shadow:0 1px 3px rgba(0,0,0,0.05)}
+.btn{background:#00b050;color:white;border:none;padding:11px 18px;border-radius:10px;font-weight:700;cursor:pointer;font-size:14px}
+.btn-call{background:#0d6efd;margin-top:6px}
+.btn-dark{background:#111}
+.tabs{display:flex;background:white;position:sticky;top:54px;z-index:999;border-bottom:1px solid #e9ecef}
+.tab{flex:1;padding:14px;text-align:center;cursor:pointer;font-weight:700;border-bottom:3px solid transparent;color:#6c757d;font-size:13px}
+.tab.active{border-bottom-color:#00b050;color:#00b050}
+#rolePage{position:fixed;top:0;left:0;width:100%;height:100%;background:white;z-index:9999;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:24px;text-align:center}
+.roleBtn{width:100%;padding:18px;margin:10px 0;border-radius:14px;border:2px solid #e9ecef;background:white;font-size:16px;font-weight:700;cursor:pointer}
+.roleBtn.customer{border-color:#00b050;color:#00b050}
+.roleBtn.mechanic{border-color:#111;color:#111}
+#registerPage,#mechRegisterPage{position:fixed;top:0;left:0;width:100%;height:100%;background:white;z-index:9998;display:none;flex-direction:column;justify-content:flex-start;align-items:center;padding:20px;overflow-y:auto}
+input,select,textarea{width:100%;padding:14px;margin:7px 0;border:1.5px solid #dee2e6;border-radius:12px;font-size:16px;outline:none}
+input:focus,select:focus,textarea:focus{border-color:#00b050}
+.badge{padding:3px 8px;border-radius:6px;font-size:11px;font-weight:700;margin-left:6px;display:inline-block}
+.badge-best{background:#ffc107;color:#000}.badge-road{background:#ff5722;color:white}.badge-state{background:#d1e7dd;color:#0f5132}.badge-new{background:#00b050;color:white}
+.spare-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:12px}
+.spare-item{background:white;border-radius:14px;padding:14px;text-align:center;border:1px solid #e9ecef}
+</style>
 </head>
 <body>
 
-<div class="header">
-  <b>🔧 MechanicNow - Nigeria</b>
-  <select id="problem">
-    <option value="engine">Engine</option>
-    <option value="tyre">Tire Puncture</option>
-    <option value="battery">Battery</option>
-    <option value="brake">Brake</option>
-  </select>
+<div id="rolePage">
+  <h1 style="margin:0;color:#00b050;font-size:32px">🔧 MechanicNow</h1>
+  <p style="color:#6c757d;margin:8px 0 24px 0">Nigeria's No.1 - Kano to Lagos</p>
+  <p style="font-weight:700">Waye Kai?</p>
+  <button class="roleBtn customer" onclick="chooseRole('customer')">👤 Ni Customer ne<br><small style="font-weight:400">Ina neman Makanike</small></button>
+  <button class="roleBtn mechanic" onclick="chooseRole('mechanic')">🔧 Ni Makanike ne<br><small style="font-weight:400">Suleiman Roged - Register Shop</small></button>
+  <p style="font-size:11px;color:#adb5bd;margin-top:20px">Play Store Ready - V1.0.0 - No Errors</p>
 </div>
 
-<div id="map"></div>
+<div id="registerPage">
+  <h2 style="color:#00b050;margin-bottom:4px">Customer Registration</h2>
+  <p style="color:#6c757d;font-size:14px;margin-top:0">Shiga da lambar wayarka</p>
+  <input id="userName" placeholder="Full Name" maxlength="30">
+  <input id="userPhone" placeholder="Phone 080..." type="tel" maxlength="11">
+  <input id="userState" placeholder="State - Kano / Lagos / Abuja">
+  <button class="btn" style="width:100%;padding:16px;margin-top:12px;font-size:16px" onclick="doCustomerRegister()">Continue - Shiga</button>
+  <button class="btn btn-dark" style="width:100%;margin-top:8px" onclick="backToRole()">← Back</button>
+</div>
 
-<div class="list">
-  <h3 id="count">Neman makanike...</h3>
-  <div id="mechanicList"></div>
+<div id="mechRegisterPage">
+  <h2 style="margin:0">Mechanic Registration</h2>
+  <p style="color:#6c757d;font-size:13px;margin-top:4px">Kawai Makanike - Shop zai bayyana a Customer App</p>
+  <input id="mName" placeholder="Sunanka - Suleiman Roged" value="Suleiman Roged" maxlength="40">
+  <input id="mPhone" placeholder="Phone - 09166904453" value="09166904453" type="tel" maxlength="11">
+  <input id="mAddress" placeholder="Shop Address - Kofar Nassarawa, Kano" value="Kofar Nassarawa, Near Northwest University, Kano" maxlength="80">
+  <select id="mState"><option>Kano</option><option>Lagos</option><option>Abuja</option><option>Kaduna</option><option>Rivers</option><option>Oyo</option><option>Enugu</option><option>Plateau</option><option>Zaria</option></select>
+  <select id="mSkill"><option value="all">All Repairs</option><option value="engine">Engine Specialist</option><option value="tyre">Tyre & Wheel</option><option value="battery">Battery & Electric</option><option value="brake">Brake Specialist</option><option value="ac">AC & Cooling</option></select>
+  <input id="mExperience" placeholder="Years Experience - 10" type="number" min="1" max="50" value="10">
+  <textarea id="mDesc" placeholder="Services..." rows="2" maxlength="120">Best mechanic Kano - Zaria Road specialist</textarea>
+  <p style="font-weight:700;font-size:13px;margin:10px 0 4px 0">📍 Tap Map - Shop Location *Required</p>
+  <div id="mapMech"></div>
+  <p id="locText" style="font-size:13px;color:#dc3545;font-weight:700">❌ Tap map to set location</p>
+  <button class="btn" style="width:100%;padding:16px" onclick="registerMechanic()">Submit - Yi Register</button>
+  <button class="btn btn-dark" style="width:100%;margin-top:8px" onclick="backToRole()">← Back</button>
+  <button class="btn" style="width:100%;margin-top:8px;background:#6c757d" onclick="goToCustomerView()">Already Registered? Go to App →</button>
+</div>
+
+<div id="mainApp" style="display:none">
+  <div class="header"><b id="welcomeText">MechanicNow</b><div><span onclick="switchToMech()" style="cursor:pointer;margin-right:12px">🔧</span><span onclick="logout()" style="cursor:pointer">🚪</span></div></div>
+  <div class="tabs">
+    <div class="tab active" onclick="openTab('mechanics',this)">Mechanics</div>
+    <div class="tab" onclick="openTab('spareparts',this)">Spare Parts</div>
+    <div class="tab" onclick="openTab('myorders',this)">Orders</div>
+    <div class="tab" onclick="openTab('mechlist',this)">Shops</div>
+  </div>
+  <div id="tab-mechanics">
+    <div id="map"></div>
+    <div style="padding:12px"><select id="filterState" onchange="filterByState()" style="width:100%;padding:14px;border-radius:12px;border:1.5px solid #dee2e6"><option value="all">All Nigeria</option><option value="Kano">Kano / Zaria Road</option><option value="Lagos">Lagos</option><option value="Abuja">Abuja</option><option value="Kaduna">Kaduna / Zaria</option><option value="Rivers">PH</option><option value="Oyo">Ibadan</option><option value="Enugu">Enugu</option><option value="Plateau">Jos</option></select></div>
+    <div style="padding:0 12px 90px 12px"><h3 id="count"></h3><div id="mechanicList"></div></div>
+  </div>
+  <div id="tab-spareparts" style="display:none;padding-bottom:90px"><div class="spare-grid" id="spareGrid"></div></div>
+  <div id="tab-myorders" style="display:none;padding:16px 12px 90px 12px"><h3>My Orders</h3><div id="orderList"></div></div>
+  <div id="tab-mechlist" style="display:none;padding:16px 12px 90px 12px"><h3>Registered Shops <span id="mechCount"></span></h3><div id="allMechList"></div></div>
 </div>
 
 <script>
-  // 1. SETUP MAP - OPENSTREETMAP (KYAUUTA - DUKA NIGERIA)
-  var myLoc = [12.0022, 8.5920]; // Default Kano
-  var map = L.map('map').setView(myLoc, 13);
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '© OpenStreetMap - Nigeria'
-  }).addTo(map);
-
-  // Marker na customer
-  var customerMarker = L.marker(myLoc).addTo(map).bindPopup("Kai a nan kake").openPopup();
-
-  // 2. DAUKI LOCATION NA GASKIYA
-  if (navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition(pos => {
-      myLoc = [pos.coords.latitude, pos.coords.longitude];
-      map.setView(myLoc, 14);
-      customerMarker.setLatLng(myLoc);
-    });
+function chooseRole(role){
+  document.getElementById("rolePage").style.display="none";
+  if(role==='customer'){
+    const u=JSON.parse(localStorage.getItem("mechanic_user")||"null");
+    if(u){document.getElementById("mainApp").style.display="block";initMap();}
+    else{document.getElementById("registerPage").style.display="flex";}
+  } else {
+    document.getElementById("mechRegisterPage").style.display="flex";
+    setTimeout(()=>{initMechMap();},200);
   }
-
-  // 3. MECHANIKS NA BOGI (Anan ne zaka hada da Firebase daga baya)
-  // Yanzu na saka na Kano, Lagos, Abuja don ka gani
-  var mechanics = [
-    {id:1, name:"Musa Auto Care Kano", state:"Kano", lat:12.009, lng:8.595, phone:"08012345678", rating:4.8, skills:"engine, tyre"},
-    {id:2, name:"Adebayo Motors Lagos", state:"Lagos", lat:6.5244, lng:3.3792, phone:"08098765432", rating:4.6, skills:"battery, engine"},
-    {id:3, name:"Emeka Fix Abuja", state:"Abuja", lat:9.0765, lng:7.3986, phone:"08055556666", rating:4.9, skills:"all"},
-    {id:4, name:"Kaduna Auto Hub", state:"Kaduna", lat:10.5223, lng:7.4383, phone:"08011112222", rating:4.5, skills:"brake, tyre"},
-  ];
-
-  // 4. NUNA SU A MAP DA LIST
-  function showMechanics() {
-    document.getElementById("count").innerText = mechanics.length + " mechanics nearby - Nigeria";
-    var listDiv = document.getElementById("mechanicList");
-    listDiv.innerHTML = "";
-    
-    mechanics.forEach(m => {
-      // Saka a Map
-      L.marker([m.lat, m.lng], {icon: L.icon({iconUrl:'https://cdn-icons-png.flaticon.com/512/3774/3774083.png', iconSize:[35,35]})})
-        .addTo(map)
-        .bindPopup(`<b>${m.name}</b><br>${m.state}<br><button onclick="requestMech(${m.id})" style="background:green;color:white;border:none;padding:5px;border-radius:5px">Request</button>`);
-
-      // Saka a List
-      listDiv.innerHTML += `
-        <div class="card">
-          <div><b>${m.name}</b> - ${m.state}<br>⭐ ${m.rating} | ${m.skills}<br><small>${m.phone}</small></div>
-          <button class="btn" onclick="requestMech(${m.id})">Request</button>
-        </div>
-      `;
-    });
-  }
-
-  // 5. FUNCTION NA REQUEST
-  window.requestMech = function(id) {
-    var mech = mechanics.find(x => x.id === id);
-    var prob = document.getElementById("problem").value;
-    alert(`An tura request ga ${mech.name}!\nMatsala: ${prob}\nLocation dinka: ${myLoc[0].toFixed(4)}, ${myLoc[1].toFixed(4)}\n\nZai kira ka a ${mech.phone} yanzu!`);
-    // Anan ne daga baya zaka saka Firebase: addDoc(collection(db, "requests"), {...})
-  }
-
+}
+function backToRole(){
+  document.getElementById("registerPage").style.display="none";
+  document.getElementById("mechRegisterPage").style.display="none";
+  document.getElementById("mainApp").style.display="none";
+  document.getElementById("rolePage").style.display="flex";
+}
+function switchToMech(){document.getElementById("mainApp").style.display="none";document.getElementById("mechRegisterPage").style.display="flex";setTimeout(()=>initMechMap(),200);}
+function goToCustomerView(){document.getElementById("mechRegisterPage").style.display="none";const u=JSON.parse(localStorage.getItem("mechanic_user")||"null");if(u){document.getElementById("mainApp").style.display="block";initMap();}else{document.getElementById("registerPage").style.display="flex";}}
+function doCustomerRegister(){
+  const name=document.getElementById("userName").value.trim();
+  const phone=document.getElementById("userPhone").value.trim();
+  const state=document.getElementById("userState").value.trim();
+  if(name.length<3){alert("Enter full name");return;}
+  if(!/^0[789][01]\d{8}$/.test(phone)){alert("Enter valid Nigerian number - 080... / 091...");return;}
+  if(state.length<2){alert("Enter state");return;}
+  localStorage.setItem("mechanic_user",JSON.stringify({name,phone,state}));
+  document.getElementById("registerPage").style.display="none";
+  document.getElementById("mainApp").style.display="block";
+  document.getElementById("welcomeText").innerText="Hi, "+name.split(" ")[0];
+  initMap();
+}
+function logout(){if(confirm("Logout?")){localStorage.removeItem("mechanic_user");location.reload();}}
+let mapMech,markerMech,selectedLoc=null;
+let mechanicsDB=JSON.parse(localStorage.getItem("mechanicNow_mechanicsDB")||"[]");
+if(mechanicsDB.length===0){
+  mechanicsDB=[{id:1,name:"Suleiman Roged",phone:"09166904453",address:"Kofar Nassarawa, Near Northwest University, Kano",state:"Kano",skill:"all",experience:"10",desc:"Best mechanic Kano - Zaria Road specialist",lat:12.0029,lng:8.5167,rating:5.0,verified:true,date:new Date().toLocaleString()}];
+  localStorage.setItem("mechanicNow_mechanicsDB",JSON.stringify(mechanicsDB));
+}
+function initMechMap(){
+  if(mapMech){setTimeout(()=>mapMech.invalidateSize(),100);return;}
+  mapMech=L.map('mapMech',{zoomControl:false}).setView([12.0029,8.5167],12);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OSM'}).addTo(mapMech);
+  L.control.zoom({position:'bottomright'}).addTo(mapMech);
+  mapMech.on('click',function(e){selectedLoc=e.latlng;if(markerMech)mapMech.removeLayer(markerMech);markerMech=L.marker(e.latlng).addTo(mapMech).bindPopup("Shop Location").openPopup();const t=document.getElementById("locText");t.innerText="✅ Location: "+e.latlng.lat.toFixed(5)+", "+e.latlng.lng.toFixed(5);t.style.color="#198754";});
+  if(navigator.geolocation){navigator.geolocation.getCurrentPosition(p=>{mapMech.setView([p.coords.latitude,p.coords.longitude],14);},()=>{}, {enableHighAccuracy:true});}
+}
+function registerMechanic(){
+  const name=document.getElementById("mName").value.trim();
+  const phone=document.getElementById("mPhone").value.trim();
+  const address=document.getElementById("mAddress").value.trim();
+  const state=document.getElementById("mState").value;
+  const skill=document.getElementById("mSkill").value;
+  const exp=document.getElementById("mExperience").value.trim();
+  const desc=document.getElementById("mDesc").value.trim();
+  if(name.length<3){alert("Enter full name");return;}
+  if(!/^0[789][01]\d{8}$/.test(phone)){alert("Enter valid number");return;}
+  if(address.length<10){alert("Enter full address");return;}
+  if(!exp||parseInt(exp)<1){alert("Enter experience");return;}
+  if(!selectedLoc){alert("Tap map to set location");return;}
+  if(mechanicsDB.some(m=>m.phone===phone && m.id!==1)){alert("Phone already registered");return;}
+  const newMech={id:Date.now(),name,phone,address,state,skill,experience:exp,desc,lat:selectedLoc.lat,lng:selectedLoc.lng,rating:5.0,verified:false,date:new Date().toLocaleString()};
+  const idx=mechanicsDB.findIndex(m=>m.phone===phone);
+  if(idx>=0) mechanicsDB[idx]=newMech; else mechanicsDB.push(newMech);
+  localStorage.setItem("mechanicNow_mechanicsDB",JSON.stringify(mechanicsDB));
+  alert("Success! "+name+" registered.");
+  goToCustomerView();
+}
+const baseMechanics=[
+  {id:1,name:"Suleiman Roged",state:"Kano",lat:12.0029,lng:8.5167,phone:"09166904453",rating:5.0,address:"Kofar Nassarawa, Near Northwest University, Kano",badge:"⭐ BEST KANO",cls:"badge-best",verified:true},
+  {id:10,name:"Zaria Road Rescue",state:"Kano",lat:11.945,lng:8.55,phone:"09166904453",rating:5.0,address:"Zaria Road, Naibawa - 24/7 Emergency",badge:"🛣️ ZARIA ROAD",cls:"badge-road",verified:true},
+  {id:11,name:"Paki International Motors",state:"Kano",lat:11.935,lng:8.545,phone:"08064977469",rating:4.5,address:"396, Zaria Road, Naibawa, Kano",badge:"ZARIA ROAD",cls:"badge-road",verified:true},
+  {id:12,name:"Kwakwaci Mechanic Village",state:"Kano",lat:11.965,lng:8.54,phone:"08035893739",rating:4.7,address:"Kwakwaci, Hajj Camp Rd, Kano",badge:"ZARIA ROAD",cls:"badge-road",verified:true},
+  {id:2,name:"The Honda Place",state:"Kano",lat:12.0101,lng:8.5225,phone:"08052222324",rating:4.8,address:"10, Club Road, Kano",badge:"Kano",cls:"badge-state",verified:true},
+  {id:20,name:"BriscoeFord",state:"Lagos",lat:6.6018,lng:3.3515,phone:"08035128451",rating:4.6,address:"20, Mobolaji Bank Anthony Way, Ikeja",badge:"Lagos",cls:"badge-state",verified:true},
+  {id:30,name:"BriscoeFord",state:"Abuja",lat:9.0765,lng:7.3986,phone:"08035128451",rating:4.6,address:"Plot 410, Jabi, Abuja",badge:"Abuja",cls:"badge-state",verified:true},
+  {id:40,name:"Kaduna Auto Hub",state:"Kaduna",lat:10.5223,lng:7.4383,phone:"08035893739",rating:4.5,address:"Lagos Road, Kaduna",badge:"Kaduna",cls:"badge-state",verified:true},
+  {id:50,name:"Briscoeford PH",state:"Rivers",lat:4.847,lng:7.02,phone:"08035128451",rating:4.5,address:"314, PH/Aba Expressway",badge:"Rivers",cls:"badge-state",verified:true},
+];
+let mechanics=[...baseMechanics];
+mechanicsDB.forEach(r=>{if(!mechanics.some(m=>m.phone===r.phone)){mechanics.push({id:r.id,name:r.name,state:r.state,lat:r.lat,lng:r.lng,phone:r.phone,rating:5.0,address:r.address,badge:"NEW ✅",cls:"badge-new",verified:r.verified||false});}});
+let filteredMechanics=[...mechanics];
+let map,myLoc=[9.082,8.6753];
+function initMap(){
+  if(map){setTimeout(()=>map.invalidateSize(),100);showMechanics();return;}
+  map=L.map('map',{zoomControl:false}).setView(myLoc,5.5);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OSM'}).addTo(map);
+  L.control.zoom({position:'bottomright'}).addTo(map);
+  if(navigator.geolocation){navigator.geolocation.getCurrentPosition(p=>{myLoc=[p.coords.latitude,p.coords.longitude];map.setView(myLoc,13);L.marker(myLoc).addTo(map).bindPopup("Your Location").openPopup();},()=>{}, {enableHighAccuracy:true});}
   showMechanics();
+}
+function showMechanics(){
+  document.getElementById("count").innerText=filteredMechanics.length+" Mechanics found";
+  const div=document.getElementById("mechanicList");div.innerHTML="";
+  filteredMechanics.forEach(m=>{
+    if(map){const icon=m.verified?L.icon({iconUrl:'https://cdn-icons-png.flaticon.com/512/3774/3774083.png',iconSize:[36,36]}):new L.Icon.Default();L.marker([m.lat,m.lng],{icon}).addTo(map).bindPopup(`<b>${m.name}</b><br>${m.address}<br>${m.phone}`);}
+    div.innerHTML+=`<div class="card"><div style="flex:1"><b>${m.name}</b> <span class="badge ${m.cls}">${m.badge}</span><br><small style="color:#6c757d">📍 ${m.address}</small><br><small>⭐ ${m.rating} • 📞 ${m.phone}</small></div><div style="display:flex;flex-direction:column;margin-left:10px"><button class="btn" onclick="requestMech(${m.id})">WhatsApp</button><button class="btn btn-call" onclick="callMech('${m.phone}')">Call</button></div></div>`;
+  });
+  renderAllMechs();
+}
+window.filterByState=function(){const v=document.getElementById("filterState").value;if(v==="all")filteredMechanics=[...mechanics];else filteredMechanics=mechanics.filter(m=>m.state===v);showMechanics();if(filteredMechanics.length>0&&map){const f=filteredMechanics[0];map.setView([f.lat,f.lng],v==="all"?5.5:11);}}
+window.callMech=function(p){window.location.href=`tel:${p}`;}
+window.requestMech=function(id){const mech=mechanics.find(x=>x.id===id);const u=JSON.parse(localStorage.getItem("mechanic_user")||"{}");const msg=`Hello ${mech.name}, I am ${u.name||'Customer'} from ${u.state||''}. I need service at: https://www.google.com/maps?q=${myLoc[0]},${myLoc[1]} - MechanicNow App`;let clean=mech.phone.replace(/\D/g,'');if(clean.startsWith('0'))clean='234'+clean.substring(1);window.open(`https://wa.me/${clean}?text=${encodeURIComponent(msg)}`,"_blank");const orders=JSON.parse(localStorage.getItem("orders")||"[]");orders.push({type:"Mechanic",name:mech.name,phone:mech.phone,address:mech.address,date:new Date().toLocaleString()});localStorage.setItem("orders",JSON.stringify(orders));renderOrders();}
+const spareParts=[{id:1,name:"Engine Oil 4L",price:15000,img:"🛢️"},{id:2,name:"Tyre 15\"",price:45000,img:"🛞"},{id:3,name:"Battery 75Ah",price:65000,img:"🔋"},{id:4,name:"Brake Pad",price:18000,img:"🛑"},{id:5,name:"Fuel Filter",price:8000,img:"⛽"},{id:6,name:"Spark Plug",price:12000,img:"🔧"},];
+const sg=document.getElementById("spareGrid");spareParts.forEach(p=>{sg.innerHTML+=`<div class="spare-item"><div style="font-size:42px">${p.img}</div><b style="font-size:14px">${p.name}</b><br><b style="color:#00b050">₦${p.price.toLocaleString()}</b><br><button class="btn" style="margin-top:8px;width:100%" onclick="buyPart(${p.id})">Buy</button></div>`;});
+window.buyPart=function(id){const part=spareParts.find(x=>x.id===id);const orders=JSON.parse(localStorage.getItem("orders")||"[]");orders.push({type:"Spare Part",name:part.name,price:part.price,date:new Date().toLocaleString()});localStorage.setItem("orders",JSON.stringify(orders));alert(`Added: ${part.name} - ₦${part.price}`);renderOrders();}
+window.openTab=function(name,el){document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));el.classList.add("active");document.getElementById("tab-mechanics").style.display=name==="mechanics"?"block":"none";document.getElementById("tab-spareparts").style.display=name==="spareparts"?"block":"none";document.getElementById("tab-myorders").style.display=name==="myorders"?"block":"none";document.getElementById("tab-mechlist").style.display=name==="mechlist"?"block":"none";if(name==="mechanics"&&map)setTimeout(()=>map.invalidateSize(),150);}
+function renderOrders(){const orders=JSON.parse(localStorage.getItem("orders")||"[]");const div=document.getElementById("orderList");if(orders.length===0){div.innerHTML="<p style='color:#6c757d'>No orders yet</p>";return;}div.innerHTML=orders.map(o=>`<div class="card"><div><b>${o.name}</b><br><small style="color:#6c757d">${o.date}</small><br><small>${o.address||o.phone||''}</small></div><div><b>${o.price?"₦"+o.price:"Service"}</b></div></div>`).join("");}
+function renderAllMechs(){const div=document.getElementById("allMechList");const count=document.getElementById("mechCount");if(!div)return;count.innerText="("+mechanicsDB.length+")";div.innerHTML=mechanicsDB.map(m=>`<div class="card"><div><b>${m.name}</b> <span class="badge" style="background:#00b050;color:white">${m.state}</span><br><small>📞 ${m.phone}</small><br><small>📍 ${m.address}</small><br><small>⭐ ${m.rating} • ${m.skill} • ${m.experience}yrs</small></div><div><button class="btn btn-call" onclick="callMech('${m.phone}')">Call</button></div></div>`).join("");}
+renderOrders();
+(function(){const u=JSON.parse(localStorage.getItem("mechanic_user")||"null");if(u){document.getElementById("rolePage").style.display="none";document.getElementById("mainApp").style.display="block";document.getElementById("welcomeText").innerText="Hi, "+u.name.split(" ")[0];setTimeout(initMap,300);}})();
 </script>
-
 </body>
   </html>
