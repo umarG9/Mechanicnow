@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>MechanicNow Nigeria</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <style>
+    body { margin:0; font-family: sans-serif; }
+    #map { height: 65vh; width: 100%; }
+    .header { background: #00b050; color: white; padding: 12px; display: flex; justify-content: space-between; align-items: center; }
+    .list { padding: 10px; height: 28vh; overflow-y: auto; }
+    .card { border: 1px solid #ddd; border-radius: 10px; padding: 10px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
+    .btn { background: #00b050; color: white; border: none; padding: 10px 18px; border-radius: 8px; cursor: pointer; font-weight: bold; }
+    select { padding: 6px; border-radius: 6px; }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <b>🔧 MechanicNow - Nigeria</b>
+  <select id="problem">
+    <option value="engine">Engine</option>
+    <option value="tyre">Tire Puncture</option>
+    <option value="battery">Battery</option>
+    <option value="brake">Brake</option>
+  </select>
+</div>
+
+<div id="map"></div>
+
+<div class="list">
+  <h3 id="count">Neman makanike...</h3>
+  <div id="mechanicList"></div>
+</div>
+
+<script>
+  // 1. SETUP MAP - OPENSTREETMAP (KYAUUTA - DUKA NIGERIA)
+  var myLoc = [12.0022, 8.5920]; // Default Kano
+  var map = L.map('map').setView(myLoc, 13);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap - Nigeria'
+  }).addTo(map);
+
+  // Marker na customer
+  var customerMarker = L.marker(myLoc).addTo(map).bindPopup("Kai a nan kake").openPopup();
+
+  // 2. DAUKI LOCATION NA GASKIYA
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(pos => {
+      myLoc = [pos.coords.latitude, pos.coords.longitude];
+      map.setView(myLoc, 14);
+      customerMarker.setLatLng(myLoc);
+    });
+  }
+
+  // 3. MECHANIKS NA BOGI (Anan ne zaka hada da Firebase daga baya)
+  // Yanzu na saka na Kano, Lagos, Abuja don ka gani
+  var mechanics = [
+    {id:1, name:"Musa Auto Care Kano", state:"Kano", lat:12.009, lng:8.595, phone:"08012345678", rating:4.8, skills:"engine, tyre"},
+    {id:2, name:"Adebayo Motors Lagos", state:"Lagos", lat:6.5244, lng:3.3792, phone:"08098765432", rating:4.6, skills:"battery, engine"},
+    {id:3, name:"Emeka Fix Abuja", state:"Abuja", lat:9.0765, lng:7.3986, phone:"08055556666", rating:4.9, skills:"all"},
+    {id:4, name:"Kaduna Auto Hub", state:"Kaduna", lat:10.5223, lng:7.4383, phone:"08011112222", rating:4.5, skills:"brake, tyre"},
+  ];
+
+  // 4. NUNA SU A MAP DA LIST
+  function showMechanics() {
+    document.getElementById("count").innerText = mechanics.length + " mechanics nearby - Nigeria";
+    var listDiv = document.getElementById("mechanicList");
+    listDiv.innerHTML = "";
+    
+    mechanics.forEach(m => {
+      // Saka a Map
+      L.marker([m.lat, m.lng], {icon: L.icon({iconUrl:'https://cdn-icons-png.flaticon.com/512/3774/3774083.png', iconSize:[35,35]})})
+        .addTo(map)
+        .bindPopup(`<b>${m.name}</b><br>${m.state}<br><button onclick="requestMech(${m.id})" style="background:green;color:white;border:none;padding:5px;border-radius:5px">Request</button>`);
+
+      // Saka a List
+      listDiv.innerHTML += `
+        <div class="card">
+          <div><b>${m.name}</b> - ${m.state}<br>⭐ ${m.rating} | ${m.skills}<br><small>${m.phone}</small></div>
+          <button class="btn" onclick="requestMech(${m.id})">Request</button>
+        </div>
+      `;
+    });
+  }
+
+  // 5. FUNCTION NA REQUEST
+  window.requestMech = function(id) {
+    var mech = mechanics.find(x => x.id === id);
+    var prob = document.getElementById("problem").value;
+    alert(`An tura request ga ${mech.name}!\nMatsala: ${prob}\nLocation dinka: ${myLoc[0].toFixed(4)}, ${myLoc[1].toFixed(4)}\n\nZai kira ka a ${mech.phone} yanzu!`);
+    // Anan ne daga baya zaka saka Firebase: addDoc(collection(db, "requests"), {...})
+  }
+
+  showMechanics();
+</script>
+
+</body>
+  </html>
